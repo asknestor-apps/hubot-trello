@@ -23,6 +23,7 @@
   "homepage": "https://github.com/hubot-scripts/hubot-trello",
   "dependencies": {
     "coffee-script": "^1.8.0",
-    "node-trello": "^0.1.5"
+    "node-trello": "^0.1.5",
+    "asknestor": "0.5.0"
   }
 }
