@@ -1,14 +1,14 @@
 {
-  "name": "hubot-trello",
+  "name": "nestor-trello",
   "version": "0.1.1",
-  "description": "manage your trello board from hubot",
-  "main": "index.coffee",
+  "description": "manage your trello board from Nestor",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hubot-scripts/hubot-trello"
+    "url": "https://github.com/asknestor-apps/trello"
   },
   "keywords": [
     "hubot",
@@ -18,12 +18,11 @@
   "author": "Jared Barboza <jared.m.barboza@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-trello/issues"
+    "url": "https://github.com/asknestor-apps/trello/issues"
   },
-  "homepage": "https://github.com/hubot-scripts/hubot-trello",
+  "homepage": "https://github.com/asknestor-apps/trello",
   "dependencies": {
-    "coffee-script": "^1.8.0",
     "node-trello": "^0.1.5",
-    "asknestor": "0.5.0"
+    "asknestor": "0.6.0"
   }
 }
