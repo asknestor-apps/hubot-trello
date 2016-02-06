@@ -1,10 +1,10 @@
 {
   "name": "Trello",
   "permalink": "trello",
-  "description": "README.md",
-  "environment_keys": [
-    "NESTOR_TRELLO_KEY",
-    "NESTOR_TRELLO_TOKEN",
-    "NESTOR_TRELLO_BOARD"
-  ]
+  "description": "manage your Trello from Nestor",
+  "environment_keys": {
+    "NESTOR_TRELLO_KEY" : true,
+    "NESTOR_TRELLO_TOKEN" : true,
+    "NESTOR_TRELLO_BOARD" : true
+  }
 }
