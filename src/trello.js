@@ -1,27 +1,27 @@
 var Trello = require('node-trello');
 
 var getLists = function(callback) {
-  trello = new Trello(process.env.HUBOT_TRELLO_KEY, process.env.HUBOT_TRELLO_TOKEN);
-  trello.get("/1/boards/" + process.env.HUBOT_TRELLO_BOARD, function(err, data) {
+  trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
+  trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD, function(err, data) {
     board = data;
-    trello.get("/1/boards/" + process.env.HUBOT_TRELLO_BOARD + "/lists", function(err, data) {
-      var i, len, list, results;
-      results = [];
+    trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD + "/lists", function(err, data) {
+      var i, len, lists;
+      lists = {}
       for (i = 0, len = data.length; i < len; i++) {
         list = data[i];
-        results.push(lists[list.name.toLowerCase()] = list);
+        lists[list.name.toLowerCase()] = list;
       }
-      callback(board, results);
+      callback(board, lists);
     });
   });
 };
 
-var createCard = function(msg, list_name, cardName) {
+var createCard = function(msg, list_name, cardName, done) {
   var id;
   msg.reply("Sure thing boss. I'll create that card for you.");
 
   getLists(function(board, lists) {
-    trello = new Trello(process.env.HUBOT_TRELLO_KEY, process.env.HUBOT_TRELLO_TOKEN);
+    trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
     id = lists[list_name.toLowerCase()].id;
     trello.post("/1/cards", {
       name: cardName,
@@ -33,11 +33,13 @@ var createCard = function(msg, list_name, cardName) {
       if (!err) {
         return msg.reply("OK, I created that card for you. You can see it here: " + data.url);
       }
+
+      done();
     });
   });
 };
 
-var showCards = function(msg, list_name) {
+var showCards = function(msg, list_name, done) {
   var id;
   msg.reply("Looking up the cards for " + list_name + ", one sec.");
 
@@ -65,14 +67,16 @@ var showCards = function(msg, list_name) {
           }
         }
         if (data.cards.length === 0 && !err) {
-          return msg.reply("No cards are currently in the " + data.name + " list.");
+          msg.reply("No cards are currently in the " + data.name + " list.");
         }
+
+        done();
       });
     }
   });
 };
 
-var moveCard = function(msg, card_id, list_name) {
+var moveCard = function(msg, card_id, list_name, done) {
   var id;
   getLists(function(board, lists) {
     id = lists[list_name.toLowerCase()].id;
@@ -80,7 +84,7 @@ var moveCard = function(msg, card_id, list_name) {
       msg.reply("I couldn't find a list named: " + list_name + ".");
     }
     if (id) {
-      return trello.put("/1/cards/" + card_id + "/idList", {
+      trello.put("/1/cards/" + card_id + "/idList", {
         value: id
       }, function(err, data) {
         if (err) {
@@ -89,6 +93,8 @@ var moveCard = function(msg, card_id, list_name) {
         if (!err) {
           return msg.reply("Yep, ok, I moved that card to " + list_name + ".");
         }
+
+        done();
       });
     }
   });
@@ -114,20 +120,22 @@ module.exports = function(robot) {
     createCard(msg, list_name, card_name);
   });
 
-  robot.respond(/trello list ["'](.+)["']/i, function(msg) {
-    showCards(msg, msg.match[1]);
+  robot.respond(/trello list ["'](.+)["']/i, function(msg, done) {
+    showCards(msg, msg.match[1], done);
   });
 
-  robot.respond(/trello move (\w+) ["'](.+)["']/i, function(msg) {
-    moveCard(msg, msg.match[1], msg.match[2]);
+  robot.respond(/trello move (\w+) ["'](.+)["']/i, function(msg, done) {
+    moveCard(msg, msg.match[1], msg.match[2], done);
   });
 
-  robot.respond(/trello list lists/i, function(msg) {
+  robot.respond(/trello list lists/i, function(msg, done) {
     msg.reply("Here are all the lists on your board.");
     getLists(function(board, lists) {
       Object.keys(lists).forEach(function(key) {
         msg.send(" * " + key);
       });
+
+      done();
     });
   });
 
