@@ -131,11 +131,12 @@ module.exports = function(robot) {
   robot.respond(/trello list lists/i, function(msg, done) {
     msg.reply("Here are all the lists on your board.");
     getLists(function(board, lists) {
+      keys = [];
       Object.keys(lists).forEach(function(key) {
-        msg.send(" * " + key);
+        keys.push("* " + key);
       });
 
-      done();
+      msg.send(keys, done);
     });
   });
 
