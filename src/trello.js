@@ -17,62 +17,59 @@ var getLists = function(callback) {
 };
 
 var createCard = function(msg, list_name, cardName, done) {
-  var id;
-  msg.reply("Sure thing boss. I'll create that card for you.");
+  msg.reply("Sure thing boss. I'll create that card for you.").then(function() {
+    getLists(function(board, lists) {
+      trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
+      id = lists[list_name.toLowerCase()].id;
 
-  getLists(function(board, lists) {
-    trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
-    id = lists[list_name.toLowerCase()].id;
-    trello.post("/1/cards", {
-      name: cardName,
-      idList: id
-    }, function(err, data) {
-      if (err) {
-        msg.reply("There was an error creating the card");
-      }
-      if (!err) {
-        return msg.reply("OK, I created that card for you. You can see it here: " + data.url);
-      }
-
-      done();
+      trello.post("/1/cards", {
+        name: cardName,
+        idList: id
+      }, function(err, data) {
+        if (err) {
+          msg.reply("There was an error creating the card", done);
+        } else {
+          msg.reply("OK, I created that card for you. You can see it here: " + data.url, done);
+        }
+      });
     });
   });
 };
 
 var showCards = function(msg, list_name, done) {
   var id;
-  msg.reply("Looking up the cards for " + list_name + ", one sec.");
 
-  getLists(function(board, lists) {
-    id = lists[list_name.toLowerCase()].id;
-    if (!id) {
-      msg.send("I couldn't find a list named: " + list_name + ".");
-    }
-    if (id) {
-      trello.get("/1/lists/" + id, {
-        cards: "open"
-      }, function(err, data) {
-        var card, i, len, ref;
-        if (err) {
-          msg.reply("There was an error showing the list.");
-        }
-        if (!(err && data.cards.length === 0)) {
-          msg.reply("Here are all the cards in " + data.name + ":");
-        }
-        if (!(err && data.cards.length === 0)) {
-          ref = data.cards;
-          for (i = 0, len = ref.length; i < len; i++) {
-            card = ref[i];
-            msg.send("* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl);
+  msg.reply("Looking up the cards for " + list_name + ", one sec.").then(function() {
+    getLists(function(board, lists) {
+      id = lists[list_name.toLowerCase()].id;
+      if (!id) {
+        msg.send("I couldn't find a list named: " + list_name + ".", done);
+      }
+      if (id) {
+        trello.get("/1/lists/" + id, {
+          cards: "open"
+        }, function(err, data) {
+          var card, i, len, ref;
+          if (err) {
+            msg.reply("There was an error showing the list.", done);
+          } else {
+            if (data.cards.length !== 0) {
+              msg.reply("Here are all the cards in " + data.name + ":").then(function() {
+                ref = data.cards;
+                cards = [];
+                for (i = 0, len = ref.length; i < len; i++) {
+                  card = ref[i];
+                  cards.push("* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl);
+                }
+                msg.send(cards, done);
+              });
+            } else {
+              msg.reply("No cards are currently in the " + data.name + " list.", done);
+            }
           }
-        }
-        if (data.cards.length === 0 && !err) {
-          msg.reply("No cards are currently in the " + data.name + " list.");
-        }
-
-        done();
-      });
-    }
+        });
+      }
+    });
   });
 };
 
@@ -129,23 +126,29 @@ module.exports = function(robot) {
   });
 
   robot.respond(/trello list lists/i, function(msg, done) {
-    msg.reply("Here are all the lists on your board.");
-    getLists(function(board, lists) {
-      keys = [];
-      Object.keys(lists).forEach(function(key) {
-        keys.push("* " + key);
-      });
+    msg.reply("Here are all the lists on your board.").then(function() {
+      getLists(function(board, lists) {
+        keys = [];
+        Object.keys(lists).forEach(function(key) {
+          keys.push("* " + key);
+        });
 
-      msg.send(keys, done);
+        msg.send(keys, done);
+      });
     });
   });
 
-  robot.respond(/trello help/i, function(msg) {
-    msg.reply("Here are all the commands for me.");
-    msg.send(" *  trello new \"<ListName>\" <TaskName>");
-    msg.send(" *  trello list \"<ListName>\"");
-    msg.send(" *  shows * [<card.shortLink>] <card.name> - <card.shortUrl>");
-    msg.send(" *  trello move <card.shortlink> \"<ListName>\"");
-    msg.send(" *  trello list lists");
+  robot.respond(/trello help/i, function(msg, done) {
+    msg.reply("Here are all the commands for me.").then(function() {
+      return msg.send([
+        " *  trello new \"<ListName>\" <TaskName>",
+        " *  trello list \"<ListName>\"",
+        " *  shows * [<card.shortLink>] <card.name> - <card.shortUrl>",
+        " *  trello move <card.shortlink> \"<ListName>\"",
+        " *  trello list lists"
+      ]);
+    }).then(function() {
+      done();
+    });
   });
 };
