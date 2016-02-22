@@ -78,43 +78,36 @@ var moveCard = function(msg, card_id, list_name, done) {
   getLists(function(board, lists) {
     id = lists[list_name.toLowerCase()].id;
     if (!id) {
-      msg.reply("I couldn't find a list named: " + list_name + ".");
+      msg.reply("I couldn't find a list named: " + list_name + ".", done);
     }
     if (id) {
       trello.put("/1/cards/" + card_id + "/idList", {
         value: id
       }, function(err, data) {
         if (err) {
-          msg.reply("Sorry boss, I couldn't move that card after all.");
+          msg.reply("Sorry boss, I couldn't move that card after all.", done);
+        } else {
+          msg.reply("Yep, ok, I moved that card to " + list_name + ".", done);
         }
-        if (!err) {
-          return msg.reply("Yep, ok, I moved that card to " + list_name + ".");
-        }
-
-        done();
       });
     }
   });
 };
 
 module.exports = function(robot) {
-  robot.respond(/trello new ["'](.+)["']\s(.*)/i, function(msg) {
+  robot.respond(/trello new ["'](.+)["']\s(.*)/i, function(msg, done) {
     var card_name, list_name;
-    if (!ensureConfig()) {
-      return;
-    }
-    card_name = msg.match[2];
     list_name = msg.match[1];
+    card_name = msg.match[2];
+
     if (card_name.length === 0) {
-      msg.reply("You must give the card a name");
-      return;
+      msg.reply("You must give the card a name", done);
     }
     if (list_name.length === 0) {
-      msg.reply("You must give a list name");
-      return;
+      msg.reply("You must give a list name", done);
     }
 
-    createCard(msg, list_name, card_name);
+    createCard(msg, list_name, card_name, done);
   });
 
   robot.respond(/trello list ["'](.+)["']/i, function(msg, done) {
