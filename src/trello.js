@@ -136,7 +136,6 @@ module.exports = function(robot) {
       return msg.send([
         " *  trello new \"<ListName>\" <TaskName>",
         " *  trello list \"<ListName>\"",
-        " *  shows * [<card.shortLink>] <card.name> - <card.shortUrl>",
         " *  trello move <card.shortlink> \"<ListName>\"",
         " *  trello list lists"
       ]);
