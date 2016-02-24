@@ -144,14 +144,6 @@ module.exports = function(robot) {
     createCard(msg, list_name, card_name, done);
   });
 
-  robot.respond(/trello list ["'](.+)["']/i, function(msg, done) {
-    showCards(msg, msg.match[1], done);
-  });
-
-  robot.respond(/trello move (\w+) ["'](.+)["']/i, function(msg, done) {
-    moveCard(msg, msg.match[1], msg.match[2], done);
-  });
-
   robot.respond(/trello list lists/i, function(msg, done) {
     msg.reply("Here are all the lists on your board.").then(function() {
       getLists(function(board, lists) {
@@ -165,4 +157,13 @@ module.exports = function(robot) {
       });
     });
   });
+
+  robot.respond(/trello list ["']*([^'"]+)["']*/i, function(msg, done) {
+    showCards(msg, msg.match[1], done);
+  });
+
+  robot.respond(/trello move (\w+) (?:to )*["']*([^'"]+)["']*/i, function(msg, done) {
+    moveCard(msg, msg.match[1], msg.match[2], done);
+  });
+
 };
