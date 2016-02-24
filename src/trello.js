@@ -1,4 +1,5 @@
 var Trello = require('node-trello');
+var moment = require('moment');
 
 var getLists = function(callback) {
   trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
@@ -55,12 +56,45 @@ var showCards = function(msg, list_name, done) {
           } else {
             if (data.cards.length !== 0) {
               msg.reply("Here are all the cards in " + data.name + ":").then(function() {
-                ref = data.cards;
-                cards = [];
-                for (i = 0, len = ref.length; i < len; i++) {
-                  card = ref[i];
-                  cards.push("* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl);
+                var cards = [];
+
+                for (i in data.cards) {
+                  var card = data.cards[i];
+                  var labelColors = card.labels.map(function(l) { return l.color; });
+                  var labelNames = card.labels.map(function(l) { return l.name; });
+                  var color = "good";
+                  if(labelColors.length > 0) {
+                    color = labelColors[0];
+                  }
+
+                  cards.push(msg.newRichResponse({
+                    title: "<" + card.shortUrl + "|" + card.name + ">",
+                    fallback: "* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl,
+                    color: color,
+                    fields: [
+                    {
+                      "title": "ID",
+                      "value": card.shortLink,
+                      "short": true
+                    },
+                    {
+                      "title": "Labels",
+                      "value": labelNames.join(', '),
+                      "short": true
+                    },
+                    {
+                      "title": "Due Date",
+                      "value": card.due,
+                      "short": true
+                    },
+                    {
+                      "title": "Last Activity",
+                      "value": moment(card.dateLastActivity).fromNow(),
+                      "short": true
+                    }]
+                  }));
                 }
+
                 msg.send(cards, done);
               });
             } else {
@@ -121,26 +155,14 @@ module.exports = function(robot) {
   robot.respond(/trello list lists/i, function(msg, done) {
     msg.reply("Here are all the lists on your board.").then(function() {
       getLists(function(board, lists) {
-        keys = [];
+        listPayload = [];
+
         Object.keys(lists).forEach(function(key) {
-          keys.push("* " + key);
+          listPayload.push(msg.newRichResponse({title: key}));
         });
 
-        msg.send(keys, done);
+        msg.send(listPayload, done);
       });
-    });
-  });
-
-  robot.respond(/trello help/i, function(msg, done) {
-    msg.reply("Here are all the commands for me.").then(function() {
-      return msg.send([
-        " *  trello new \"<ListName>\" <TaskName>",
-        " *  trello list \"<ListName>\"",
-        " *  trello move <card.shortlink> \"<ListName>\"",
-        " *  trello list lists"
-      ]);
-    }).then(function() {
-      done();
     });
   });
 };
