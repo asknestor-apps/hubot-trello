@@ -81,16 +81,6 @@ var showCards = function(msg, list_name, done) {
                       "title": "Labels",
                       "value": labelNames.join(', '),
                       "short": true
-                    },
-                    {
-                      "title": "Due Date",
-                      "value": card.due,
-                      "short": true
-                    },
-                    {
-                      "title": "Last Activity",
-                      "value": moment(card.dateLastActivity).fromNow(),
-                      "short": true
                     }]
                   }));
                 }
