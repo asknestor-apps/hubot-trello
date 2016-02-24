@@ -1,6 +1,20 @@
 var Trello = require('node-trello');
 var moment = require('moment');
 
+var colorMap = {
+  'green': '#61bd4f',
+  'yellow': '#f2d600',
+  'orange': '#ffab4a',
+  'red': '#eb5a46',
+  'purple': '#c377e0',
+  'blue': '#0079bf',
+  'sky': '#00c2e0',
+  'lime': '#51e898',
+  'pink': '#ff80ce',
+  'black': '#4d4d4d',
+  'null': '#b6bbbf'
+}
+
 var getLists = function(callback) {
   trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
   trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD, function(err, data) {
@@ -62,9 +76,15 @@ var showCards = function(msg, list_name, done) {
                   var card = data.cards[i];
                   var labelColors = card.labels.map(function(l) { return l.color; });
                   var labelNames = card.labels.map(function(l) { return l.name; });
-                  var color = "good";
+                  var color = null;
                   if(labelColors.length > 0) {
                     color = labelColors[0];
+                  }
+
+                  if(color) {
+                    color = colorMap[color] || '#b6bbbf';
+                  } else {
+                    color = '#b6bbbf';
                   }
 
                   cards.push(msg.newRichResponse({
