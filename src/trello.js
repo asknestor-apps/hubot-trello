@@ -160,7 +160,7 @@ module.exports = function(robot) {
         listPayload = [];
 
         Object.keys(lists).forEach(function(key) {
-          listPayload.push(msg.newRichResponse({title: key}));
+          listPayload.push(msg.newRichResponse({title: key, fallback: key}));
         });
 
         msg.send(listPayload, done);
