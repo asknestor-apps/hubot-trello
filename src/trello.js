@@ -88,7 +88,8 @@ var showCards = function(msg, list_name, done) {
                   }
 
                   cards.push(msg.newRichResponse({
-                    title: "<" + card.shortUrl + "|" + card.name + ">",
+                    title: card.name,
+                    title_link: card.shortUrl,
                     fallback: "* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl,
                     color: color,
                     fields: [
