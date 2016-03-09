@@ -3,8 +3,19 @@
   "permalink": "trello",
   "description": "manage your Trello from Nestor",
   "environment_keys": {
-    "NESTOR_TRELLO_KEY" : true,
-    "NESTOR_TRELLO_TOKEN" : true,
-    "NESTOR_TRELLO_BOARD" : true
+    "NESTOR_TRELLO_KEY": {
+      "required": true,
+      "mode": "oauth",
+      "default": "638820db4be50464e1b442a8d8ce3cc6"
+    },
+    "NESTOR_TRELLO_TOKEN": {
+      "required": true,
+      "mode": "oauth",
+      "extract_from": "token"
+    },
+    "NESTOR_TRELLO_BOARD": {
+      "required": true,
+      "mode": "user"
+    }
   }
 }
