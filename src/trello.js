@@ -54,67 +54,65 @@ var createCard = function(msg, list_name, cardName, done) {
 var showCards = function(msg, list_name, done) {
   var id;
 
-  msg.reply("Looking up the cards for " + list_name + ", one sec.").then(function() {
-    getLists(function(board, lists) {
-      id = lists[list_name.toLowerCase()].id;
-      if (!id) {
-        msg.send("I couldn't find a list named: " + list_name + ".", done);
-      }
-      if (id) {
-        trello.get("/1/lists/" + id, {
-          cards: "open"
-        }, function(err, data) {
-          var card, i, len, ref;
-          if (err) {
-            msg.reply("There was an error showing the list.", done);
-          } else {
-            if (data.cards.length !== 0) {
-              msg.reply("Here are all the cards in " + data.name + ":").then(function() {
-                var cards = [];
+  getLists(function(board, lists) {
+    id = lists[list_name.toLowerCase()].id;
+    if (!id) {
+      msg.send("I couldn't find a list named: " + list_name + ".", done);
+    }
+    if (id) {
+      trello.get("/1/lists/" + id, {
+        cards: "open"
+      }, function(err, data) {
+        var card, i, len, ref;
+        if (err) {
+          msg.reply("There was an error showing the list.", done);
+        } else {
+          if (data.cards.length !== 0) {
+            msg.reply("Here are all the cards in " + data.name + ":").then(function() {
+              var cards = [];
 
-                for (i in data.cards) {
-                  var card = data.cards[i];
-                  var labelColors = card.labels.map(function(l) { return l.color; });
-                  var labelNames = card.labels.map(function(l) { return l.name; });
-                  var color = null;
-                  if(labelColors.length > 0) {
-                    color = labelColors[0];
-                  }
-
-                  if(color) {
-                    color = colorMap[color] || '#b6bbbf';
-                  } else {
-                    color = '#b6bbbf';
-                  }
-
-                  cards.push(msg.newRichResponse({
-                    title: card.name,
-                    title_link: card.shortUrl,
-                    fallback: "* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl,
-                    color: color,
-                    fields: [
-                    {
-                      "title": "ID",
-                      "value": card.shortLink,
-                      "short": true
-                    },
-                    {
-                      "title": "Labels",
-                      "value": labelNames.join(', '),
-                      "short": true
-                    }]
-                  }));
+              for (i in data.cards) {
+                var card = data.cards[i];
+                var labelColors = card.labels.map(function(l) { return l.color; });
+                var labelNames = card.labels.map(function(l) { return l.name; });
+                var color = null;
+                if(labelColors.length > 0) {
+                  color = labelColors[0];
                 }
 
-                msg.send(cards, done);
-              });
-            } else {
-              msg.reply("No cards are currently in the " + data.name + " list.", done);
-            }
+                if(color) {
+                  color = colorMap[color] || '#b6bbbf';
+                } else {
+                  color = '#b6bbbf';
+                }
+
+                cards.push(msg.newRichResponse({
+                  title: card.name,
+                  title_link: card.shortUrl,
+                  fallback: "* [" + card.shortLink + "] " + card.name + " - " + card.shortUrl,
+                  color: color,
+                  fields: [
+                  {
+                    "title": "ID",
+                    "value": card.shortLink,
+                    "short": true
+                  },
+                  {
+                    "title": "Labels",
+                    "value": labelNames.join(', '),
+                    "short": true
+                  }]
+                }));
+              }
+
+              msg.send(cards, done);
+            });
+          } else {
+            msg.reply("No cards are currently in the " + data.name + " list.", done);
           }
-        });
-      }
-    });
+        }
+      });
+    }
   });
 };
 
