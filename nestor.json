@@ -6,7 +6,7 @@
     "NESTOR_TRELLO_KEY": {
       "required": true,
       "mode": "oauth",
-      "default": "638820db4be50464e1b442a8d8ce3cc6"
+      "default": "1b1de3d324adf3ea1ae5cddafe3e4888"
     },
     "NESTOR_TRELLO_TOKEN": {
       "required": true,
