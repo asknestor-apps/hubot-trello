@@ -138,7 +138,7 @@ var moveCard = function(msg, card_id, list_name, done) {
 };
 
 module.exports = function(robot) {
-  robot.respond(/trello new ["'](.+)["']\s(.*)/i, function(msg, done) {
+  robot.respond(/trello new ["'](.+)["']\s(.*)/i, { suggestions: ["trello new \"<card>\" <list>"] }, function(msg, done) {
     var card_name, list_name;
     list_name = msg.match[1];
     card_name = msg.match[2];
@@ -153,7 +153,7 @@ module.exports = function(robot) {
     createCard(msg, list_name, card_name, done);
   });
 
-  robot.respond(/trello list lists/i, function(msg, done) {
+  robot.respond(/trello list lists/i, { suggestions: ["trello list lists"] }, function(msg, done) {
     msg.reply("Here are all the lists on your board.").then(function() {
       getLists(function(board, lists) {
         listPayload = [];
@@ -167,11 +167,11 @@ module.exports = function(robot) {
     });
   });
 
-  robot.respond(/trello list ["']*([^'"]+)["']*/i, function(msg, done) {
+  robot.respond(/trello list ["']*([^'"]+)["']*/i, { suggestions: ["trello list <list>"] }, function(msg, done) {
     showCards(msg, msg.match[1], done);
   });
 
-  robot.respond(/trello move (\w+) (?:to )*["']*([^'"]+)["']*/i, function(msg, done) {
+  robot.respond(/trello move (\w+) (?:to )*["']*([^'"]+)["']*/i, { suggestions: ["trello move <card> to <list>"] }, function(msg, done) {
     moveCard(msg, msg.match[1], msg.match[2], done);
   });
 
