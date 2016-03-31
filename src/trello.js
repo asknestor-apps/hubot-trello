@@ -64,7 +64,10 @@ var showCards = function(msg, list_name, done) {
           listPayload.push(msg.newRichResponse({title: key, fallback: key}));
         });
 
-        msg.send(listPayload, done);
+        msg.send(listPayload).then(function() {
+          var firstList = Object.keys(lists)[0];
+          msg.send("To find out what cards you have in the \"" + firstList + "\" list, say `@nestorbot: trello list " + firstList + "`", done);
+        });
       });
     } else {
       var id = lists[list_name.toLowerCase()].id;
@@ -127,20 +130,24 @@ var showCards = function(msg, list_name, done) {
 var moveCard = function(msg, card_id, list_name, done) {
   var id;
   getLists(function(board, lists) {
-    id = lists[list_name.toLowerCase()].id;
-    if (!id) {
-      msg.reply("I couldn't find a list named: " + list_name + ".", done);
-    }
-    if (id) {
-      trello.put("/1/cards/" + card_id + "/idList", {
-        value: id
-      }, function(err, data) {
-        if (err) {
-          msg.reply("Sorry boss, I couldn't move that card after all.", done);
-        } else {
-          msg.reply("Yep, ok, I moved that card to " + list_name + ".", done);
-        }
-      });
+    if(Object.keys(lists).length > 0) {
+      id = lists[list_name.toLowerCase()].id;
+      if (!id) {
+        msg.reply("I couldn't find a list named: " + list_name + ".", done);
+      }
+      if (id) {
+        trello.put("/1/cards/" + card_id + "/idList", {
+          value: id
+        }, function(err, data) {
+          if (err) {
+            msg.reply("Sorry boss, I couldn't move that card after all.", done);
+          } else {
+            msg.reply("Yep, ok, I moved that card to " + list_name + ".", done);
+          }
+        });
+      }
+    } else {
+      msg.send("Oops, you don't have any lists on this board", done);
     }
   });
 };
@@ -162,16 +169,20 @@ module.exports = function(robot) {
   });
 
   robot.respond(/trello list lists/i, { suggestions: ["trello list lists"] }, function(msg, done) {
-    msg.reply("Here are all the lists on your board.").then(function() {
-      getLists(function(board, lists) {
-        listPayload = [];
-
+    getLists(function(board, lists) {
+      listPayload = [];
+      if(Object.keys(lists).length > 0) {
         Object.keys(lists).forEach(function(key) {
           listPayload.push(msg.newRichResponse({title: key, fallback: key}));
         });
 
-        msg.send(listPayload, done);
-      });
+        msg.send(listPayload).then(function() {
+          var firstList = Object.keys(lists)[0];
+          msg.send("To find out what cards you have in the \"" + firstList + "\" list, say `@nestorbot: trello list " + firstList + "`", done);
+        });
+      } else {
+        msg.send("Oops, you don't have any lists on this board", done);
+      }
     });
   });
 
