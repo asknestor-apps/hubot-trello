@@ -55,11 +55,19 @@ var showCards = function(msg, list_name, done) {
   var id;
 
   getLists(function(board, lists) {
-    id = lists[list_name.toLowerCase()].id;
-    if (!id) {
-      msg.send("I couldn't find a list named: " + list_name + ".", done);
-    }
-    if (id) {
+    var list = lists[list_name.toLowerCase()];
+    if (!list) {
+      msg.send("Oops, I couldn't find a list named: " + list_name + ". Here are the lists in this board:").then(function() {
+        var listPayload = [];
+
+        Object.keys(lists).forEach(function(key) {
+          listPayload.push(msg.newRichResponse({title: key, fallback: key}));
+        });
+
+        msg.send(listPayload, done);
+      });
+    } else {
+      var id = lists[list_name.toLowerCase()].id;
       trello.get("/1/lists/" + id, {
         cards: "open"
       }, function(err, data) {
