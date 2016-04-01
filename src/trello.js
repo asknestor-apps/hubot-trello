@@ -133,7 +133,7 @@ var moveCard = function(msg, card_id, list_name, done) {
     if(Object.keys(lists).length > 0) {
       id = lists[list_name.toLowerCase()].id;
       if (!id) {
-        msg.reply("I couldn't find a list named: " + list_name + ".", done);
+        msg.reply("I couldn't find a list named: \"" + list_name + "\".", done);
       }
       if (id) {
         trello.put("/1/cards/" + card_id + "/idList", {
