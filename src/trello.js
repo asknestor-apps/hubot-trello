@@ -147,7 +147,7 @@ var moveCard = function(msg, card_id, list_name, done) {
         });
       }
     } else {
-      msg.send("Oops, you don't have any lists on this board", done);
+      msg.send("Oops, you don't have any lists in this board", done);
     }
   });
 };
@@ -181,7 +181,7 @@ module.exports = function(robot) {
           msg.send("To find out what cards you have in the \"" + firstList + "\" list, say `@nestorbot: trello list " + firstList + "`", done);
         });
       } else {
-        msg.send("Oops, you don't have any lists on this board", done);
+        msg.send("Oops, you don't have any lists in this board", done);
       }
     });
   });
