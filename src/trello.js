@@ -1,5 +1,6 @@
 var Trello = require('node-trello');
 var moment = require('moment');
+var trelloErrorHandler = require('./error');
 
 var colorMap = {
   'green': '#61bd4f',
@@ -15,25 +16,33 @@ var colorMap = {
   'null': '#b6bbbf'
 }
 
-var getLists = function(callback) {
+var getLists = function(msg, done, callback) {
   trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
   trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD, function(err, data) {
-    board = data;
-    trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD + "/lists", function(err, data) {
-      var i, len, lists;
-      lists = {}
-      for (i = 0, len = data.length; i < len; i++) {
-        list = data[i];
-        lists[list.name.toLowerCase()] = list;
-      }
-      callback(board, lists);
-    });
+    if (err) {
+      trelloErrorHandler(err, msg, done);
+    } else {
+      board = data;
+      trello.get("/1/boards/" + process.env.NESTOR_TRELLO_BOARD + "/lists", function(err, data) {
+        if (err) {
+          trelloErrorHandler(err, msg, done);
+        } else {
+          var i, len, lists;
+          lists = {}
+          for (i = 0, len = data.length; i < len; i++) {
+            list = data[i];
+            lists[list.name.toLowerCase()] = list;
+          }
+          callback(board, lists);
+        }
+      });
+    }
   });
 };
 
 var createCard = function(msg, list_name, cardName, done) {
   msg.reply("Sure thing boss. I'll create that card for you.").then(function() {
-    getLists(function(board, lists) {
+    getLists(msg, done, function(board, lists) {
       trello = new Trello(process.env.NESTOR_TRELLO_KEY, process.env.NESTOR_TRELLO_TOKEN);
       id = lists[list_name.toLowerCase()].id;
 
@@ -54,7 +63,7 @@ var createCard = function(msg, list_name, cardName, done) {
 var showCards = function(msg, list_name, done) {
   var id;
 
-  getLists(function(board, lists) {
+  getLists(msg, done, function(board, lists) {
     var list = lists[list_name.toLowerCase()];
     if (!list) {
       msg.send("Oops, I couldn't find a list named: " + list_name + ". Here are the lists in this board:").then(function() {
@@ -129,7 +138,7 @@ var showCards = function(msg, list_name, done) {
 
 var moveCard = function(msg, card_id, list_name, done) {
   var id;
-  getLists(function(board, lists) {
+  getLists(msg, done, function(board, lists) {
     if(Object.keys(lists).length > 0) {
       id = lists[list_name.toLowerCase()].id;
       if (!id) {
@@ -169,7 +178,7 @@ module.exports = function(robot) {
   });
 
   robot.respond(/trello list lists/i, { suggestions: ["trello list lists"] }, function(msg, done) {
-    getLists(function(board, lists) {
+    getLists(msg, done, function(board, lists) {
       listPayload = [];
       if(Object.keys(lists).length > 0) {
         Object.keys(lists).forEach(function(key) {

@@ -23,7 +23,7 @@
   "homepage": "https://github.com/asknestor-apps/trello",
   "dependencies": {
     "moment": "2.11.2",
-    "nestorbot": "0.35.0",
-    "node-trello": "^0.1.5"
+    "nestorbot": "0.36.0",
+    "node-trello": "1.1.2"
   }
 }
